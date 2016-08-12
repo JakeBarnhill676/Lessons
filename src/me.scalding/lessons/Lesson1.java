@@ -13,13 +13,12 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by Jake on 8/10/2016.
+ * @author Scalding (Jake)
+ *
+ * This lesson is on saving locations into seperate configs (and using seperate configs). And also how to retrieve those locations for later use
  */
-public class Lesson1 extends JavaPlugin {
 
-    /**
-     * This lesson is on saving locations into seperate configs (and using seperate configs). And also how to retrieve those locations for later use
-     */
+public class Lesson1 extends JavaPlugin {
 
     private File dataFile;
     /*
