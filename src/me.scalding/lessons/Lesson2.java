@@ -4,7 +4,12 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -18,7 +23,12 @@ import java.util.UUID;
  * This lesson is all about particles. Player trail particles and Arrow particles
  */
 
-public class Lesson2 extends JavaPlugin {
+public class Lesson2 extends JavaPlugin implements Listener{
+
+    /*
+    Notice how we implement Listener           ^^^^
+    This means that this class will contains an event listener (like blockbreak etc) so this is required
+    */
 
     private Map<UUID, Particle> playerTrail;
     /*
@@ -31,6 +41,13 @@ public class Lesson2 extends JavaPlugin {
         playerTrail = new HashMap<>();
         /*
         This assigns playerTrail to a new HashMap object
+         */
+        getServer().getPluginManager().registerEvents(this, this);
+        /*
+        This says to look at this class for events, the first 'this' is where your class that implements Listener goes
+        (If you have multiple classes that implement listener, just repeat this line except change the first this)
+        The second 'this' is referring to your main class. Pretty much 99% of the time you want to register it in your
+        main class' onEnable
          */
     }
 
@@ -185,5 +202,53 @@ public class Lesson2 extends JavaPlugin {
      */
     }
 
+    @EventHandler
+    /*
+    This line is used to signify an event, put this above every event
+     */
+    public void projectileShoot(EntityShootBowEvent e) {
+        /*
+        This creates a new void method with 'EntityBowShootEvent' as an argument. This is
+        called when an entity uses a bow
+         */
+        if(e.getEntityType() == EntityType.PLAYER&&e.getProjectile() instanceof  Arrow) {
+            /*
+            This line checks if the entity who used the bow is a player and if the projectile is an arrow
+             */
+            final Arrow arrow = (Arrow) e.getProjectile();
+            /*
+            Creates a new arrow object from the projectile (we know the projectile is an arrow
+            from the if statement above so it is safe to cast it.
+             */
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    /*
+                    From the other lesson, you should understand runnables. If you don't look back at that lesson
+                    or ask me
+                     */
+                    if(arrow.isDead()||arrow.isOnGround()||!arrow.isValid()) {
+                        /*
+                        This checks if the arrow is still in the air (if it is not we will stop spawning particles
+                         */
+                        cancel();
+                        /*
+                        Stops the runnable so no more particles are spawned
+                         */
+                        return;
+                        /*
+                        Says run() is finished
+                         */
+                    }
+                    arrow.getLocation().clone().getWorld().spawnParticle( Particle.BARRIER, arrow.getLocation().clone(), 1);
+                    /*
+                    This spawns the particle at the arrows location (if the arrow is still flying)
+                    You can change the particle to mostly anything (some might not look very smooth)
+                     */
+
+                }
+            }.runTaskTimer(this, 0, 1);
+        }
+    }
 
 }
